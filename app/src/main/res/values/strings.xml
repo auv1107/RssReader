@@ -15,4 +15,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_example">Example action</string>
+
+    <string name="btn_exchange">~&gt;.&lt;~</string>
+
 </resources>

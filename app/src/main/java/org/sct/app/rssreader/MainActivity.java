@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,6 +36,12 @@ public class MainActivity extends Activity {
     public ListView lv_rsslist = null;
     public RssListAdapter mAdapter = null;
     public Handler mHandler = null;
+    public TextView tv_source_title = null;
+
+    public String mSourceTitle = "知乎每日精选";
+    public String mSourceUri = "http://www.zhihu.com/rss";
+
+    public View mHeaderView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +52,8 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 RSSReader reader = new RSSReader();
-                String uri = "http://feed.williamlong.info/";
                 try {
-                    RSSFeed feed = reader.load(uri);
+                    RSSFeed feed = reader.load(mSourceUri);
                     mRssItems = feed.getItems();
                     mHandler.post(new Runnable() {
                         @Override
@@ -68,6 +74,8 @@ public class MainActivity extends Activity {
 
     public void findView() {
         lv_rsslist = (ListView) findViewById(R.id.lv_rsslist);
+        mHeaderView = LayoutInflater.from(this).inflate(R.layout.headerview, null);
+        tv_source_title = (TextView) mHeaderView.findViewById(R.id.tv_source_title);
     }
     public void initView() {
         mAdapter = new RssListAdapter(this, LayoutInflater.from(this));
@@ -76,11 +84,13 @@ public class MainActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(MainActivity.this, ContentActivity.class);
-                intent.putExtra("title", mRssItems.get(i).getTitle());
-                intent.putExtra("content", mRssItems.get(i).getDescription());
+                intent.putExtra("title", mRssItems.get(i-1).getTitle());
+                intent.putExtra("content", mRssItems.get(i-1).getDescription());
                 startActivity(intent);
             }
         });
+        lv_rsslist.addHeaderView(mHeaderView);
+        tv_source_title.setText(mSourceTitle);
     }
 
     @Override
@@ -143,7 +153,7 @@ public class MainActivity extends Activity {
             }
 
             RSSItem item = mRssItems.get(position);
-            holder.tv_description.setText(item.getDescription());
+            holder.tv_description.setText(Html.fromHtml(item.getDescription()));
             holder.tv_title.setText(item.getTitle());
             List<MediaThumbnail> list = item.getThumbnails();
             if (list != null && list.size() > 0) {
